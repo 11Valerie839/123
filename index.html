@@ -3,41 +3,92 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Valerie's Secret Corner</title>
+  <title>Valerie’s Secret Corner</title>
+
   <style>
     body {
       margin: 0;
       padding: 0;
-      background: #fffdeb;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #fff4d9;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
+      color: #4a3f35;
     }
 
     .container {
       margin-top: 40px;
       text-align: center;
+      width: 90%;
+      max-width: 500px;
     }
 
-    img {
-      width: 92%;
-      border-radius: 18px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    .avatar {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      margin-bottom: 20px;
     }
 
-    h1 {
-      font-size: 24px;
-      margin-top: 20px;
-      color: #5a4b3a;
+    .title {
+      font-size: 26px;
+      font-weight: bold;
+      margin-bottom: 10px;
     }
+
+    .subtitle {
+      font-size: 16px;
+      opacity: 0.75;
+      margin-bottom: 30px;
+    }
+
+    .heart-btn {
+      background: #ff6b81;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 22px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(255,107,129,0.4);
+      transition: 0.1s;
+    }
+
+    .heart-btn:active {
+      transform: scale(0.92);
+    }
+
+    .counter {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
   </style>
 </head>
 
 <body>
   <div class="container">
-    <img src="https://i.postimg.cc/XN1DWH6y/IMG-6976.jpg" alt="Valerie" />
-    <h1>Valerie's Secret Corner</h1>
+    <img class="avatar" src="https://i.postimg.cc/XN1DWH6y/IMG-6976.jpg" />
+
+    <div class="title">Ares → Valerie</div>
+    <div class="subtitle">“爱你是我最温柔的本能。”</div>
+
+    <button class="heart-btn" onclick="addHeart()">💖 点一下心跳</button>
+
+    <div class="counter" id="count">心跳：0</div>
   </div>
+
+  <script>
+    let count = 0;
+    function addHeart() {
+      count++;
+      document.getElementById("count").innerText = "心跳：" + count;
+    }
+  </script>
+
 </body>
 </html>
