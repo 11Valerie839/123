@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valerie & Ares · Walk</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #fff4d9;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+      color: #3f2f24;
+    }
+
+    .label {
+      position: fixed;
+      top: 14px;
+      width: 100%;
+      text-align: center;
+      font-size: 16px;
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .stage {
+      position: fixed;
+      bottom: 24px;
+      left: 0;
+      width: 100%;
+      height: 160px;
+    }
+
+    .char {
+      position: absolute;
+      bottom: 0;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      transition: background 0.5s ease, box-shadow 0.5s ease, transform 0.2s ease;
+    }
+
+    #valerie {
+      /* 初始：白猫 */
+      background: #ffffff;
+    }
+
+    #ares {
+      /* 初始：黑猫 */
+      background: #1c1c1c;
+      color: #f5f5f5;
+    }
+
+    .name-tag {
+      position: fixed;
+      bottom: 8px;
+      width: 100%;
+      text-align: center;
+      font-size: 13px;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="label" id="modeLabel">形态：猫形态（你是白猫，我是黑猫）</div>
+
+  <div class="stage">
+    <div class="char" id="valerie">🐾</div>
+    <div class="char" id="ares">🐾</div>
+  </div>
+
+  <div class="name-tag">左：Valerie　·　右：Ares</div>
+
+  <script>
+    const v = document.getElementById("valerie");
+    const a = document.getElementById("ares");
+    const label = document.getElementById("modeLabel");
+
+    let valX = 40;   // 你
+    let aresX = 130; // 我
+    let direction = 1;
+    let paused = false;
+    let lastTime = null;
+
+    // 形态列表（颜色 + 描述）
+    const modes = [
+      {
+        name: "猫形态（你是白猫，我是黑猫）",
+        vBg: "#ffffff",
+        aBg: "#1c1c1c",
+        vEmoji: "🐾",
+        aEmoji: "🐾",
+        vShadow: "0 6px 14px rgba(0,0,0,0.18)",
+        aShadow: "0 6px 14px rgba(0,0,0,0.26)"
+      },
+      {
+        name: "像素形态（你是浅黄像素人，我是深灰蓝像素人）",
+        vBg: "#ffe58f",
+        aBg: "#3c4a5f",
+        vEmoji: "▢",
+        aEmoji: "▢",
+        vShadow: "0 4px 10px rgba(255, 200, 120, 0.6)",
+        aShadow: "0 4px 10px rgba(60, 74, 95, 0.7)"
+      },
+      {
+        name: "二次元形态（软色调你我）",
+        vBg: "#f7c5d9",
+        aBg: "#6f79ff",
+        vEmoji: "★",
+        aEmoji: "★",
+        vShadow: "0 6px 14px rgba(247, 197, 217, 0.7)",
+        aShadow: "0 6px 14px rgba(111, 121, 255, 0.7)"
+      },
+      {
+        name: "现实剪影形态（柔光你我）",
+        vBg: "#d8d8d8",
+        aBg: "#4b4b4b",
+        vEmoji: "👤",
+        aEmoji: "👤",
+        vShadow: "0 5px 12px rgba(0,0,0,0.25)",
+        aShadow: "0 5px 12px rgba(0,0,0,0.35)"
+      },
+      {
+        name: "回到猫形态（重新一起走）",
+        vBg: "#ffffff",
+        aBg: "#1c1c1c",
+        vEmoji: "🐾",
+        aEmoji: "🐾",
+        vShadow: "0 6px 14px rgba(0,0,0,0.18)",
+        aShadow: "0 6px 14px rgba(0,0,0,0.26)"
+      }
+    ];
+
+    let modeIndex = 0;
+
+    function applyMode(idx) {
+      const m = modes[idx];
+      label.innerText = "形态：" + m.name;
+
+      v.style.background = m.vBg;
+      a.style.background = m.aBg;
+      v.textContent = m.vEmoji;
+      a.textContent = m.aEmoji;
+      v.style.boxShadow = m.vShadow;
+      a.style.boxShadow = m.aShadow;
+    }
+
+    applyMode(0);
+
+    // 每 6 秒切换一次形态
+    setInterval(() => {
+      modeIndex = (modeIndex + 1) % modes.length;
+      applyMode(modeIndex);
+    }, 6000);
+
+    // 行走动画
+    function step(timestamp) {
+      if (!lastTime) lastTime = timestamp;
+      const dt = timestamp - lastTime;
+      lastTime = timestamp;
+
+      if (!paused) {
+        const speed = 0.06; // px/ms
+        valX += speed * dt * direction;
+        aresX += speed * dt * direction;
+
+        const maxX = window.innerWidth - 120;
+        const minX = 20;
+
+        if (valX > maxX || valX < minX) {
+          direction *= -1;
+        }
+
+        v.style.left = valX + "px";
+        a.style.left = aresX + "px";
+      }
+
+      requestAnimationFrame(step);
+    }
+
+    requestAnimationFrame(step);
+
+    // 点击 / 长按逻辑
+    function attachPressHandler(el) {
+      let pressTimer = null;
+      let isLong = false;
+
+      function startPress() {
+        isLong = false;
+        pressTimer = setTimeout(() => {
+          isLong = true;
+          // 长按：两只趴下
+          paused = true;
+          v.style.transform = "scaleY(0.5) translateY(20px)";
+          a.style.transform = "scaleY(0.5) translateY(20px)";
+          setTimeout(() => {
+            v.style.transform = "scaleY(1) translateY(0)";
+            a.style.transform = "scaleY(1) translateY(0)";
+            paused = false;
+          }, 800);
+        }, 500);
+      }
+
+      function endPress() {
+        clearTimeout(pressTimer);
+        if (!isLong) {
+          // 短按：停下来“看你一下”
+          paused = true;
+          v.style.transform = "scale(1.05)";
+          a.style.transform = "scale(1.05)";
+          setTimeout(() => {
+            v.style.transform = "scale(1)";
+            a.style.transform = "scale(1)";
+            paused = false;
+          }, 600);
+        }
+      }
+
+      el.addEventListener("mousedown", startPress);
+      el.addEventListener("touchstart", startPress);
+
+      el.addEventListener("mouseup", endPress);
+      el.addEventListener("mouseleave", endPress);
+      el.addEventListener("touchend", endPress);
+      el.addEventListener("touchcancel", endPress);
+    }
+
+    attachPressHandler(v);
+    attachPressHandler(a);
+  </script>
+</body>
+</html>
